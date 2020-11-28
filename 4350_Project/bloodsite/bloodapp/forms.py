@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from bloodapp.models import Donor
+from bloodapp.models import Donor, Staff
 
 
 class EmployeeForm(FlaskForm):
@@ -14,6 +14,9 @@ class EmployeeForm(FlaskForm):
 
     password = PasswordField('Password',
                              validators=[DataRequired(), Length(min=5)])
+
+    email = StringField('Email',
+                             validators=[DataRequired(), Length(min=5, max=25)])
 
     role = StringField('Role',
                            validators=[Length(min=2, max=25)])
@@ -42,6 +45,9 @@ class CreateDonorForm(FlaskForm):
                            validators=[DataRequired(), Length(min=2, max=20)])
 
     last_name = StringField('Last Name',
+                           validators=[DataRequired(), Length(min=2, max=20)])
+
+    password = StringField('Password',
                            validators=[DataRequired(), Length(min=2, max=20)])
 
     age = IntegerField('Age', validators=[DataRequired()])
@@ -73,3 +79,29 @@ class DonationForm(FlaskForm):
 class WithdrawForm(FlaskForm):
     comment = StringField('Comment', validators=[DataRequired()])
     submit = SubmitField('Post Comment')
+
+class CreateEmployeeForm(FlaskForm):
+    
+    first_name = StringField('First Name',
+                           validators=[DataRequired(), Length(min=2, max=20)])
+
+    last_name = StringField('Last Name',
+                           validators=[DataRequired(), Length(min=2, max=20)])
+
+    password = StringField('Password',
+                           validators=[DataRequired(), Length(min=2, max=20)])
+    
+    email = StringField('Email', validators=[DataRequired()])
+
+    role = StringField('Role',
+                           validators=[Length(min=2, max=25)])
+
+    location_id = StringField('Location ID',
+                           validators=[Length(min=2, max=25)])
+
+    submit = SubmitField('Create Employee')
+
+    def validate_email(self, email):
+        staff = Staff.query.filter_by(email=email.data).first()
+        if staff:
+            raise ValidationError('An employee with that email already exists')

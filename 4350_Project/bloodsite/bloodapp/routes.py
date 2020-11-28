@@ -1,7 +1,7 @@
 from flask import render_template, url_for, flash, redirect, request
 from flask_login import login_user, current_user, logout_user, login_required
-from bloodapp.forms import CreateDonorForm
-from bloodapp.models import Donor
+from bloodapp.forms import CreateDonorForm, CreateEmployeeForm
+from bloodapp.models import Donor, Staff
 from bloodapp import app, db, bcrypt
 
 
@@ -34,3 +34,14 @@ def createDonor():
         db.session.commit()
         flash(f'Donor Added To database,', category='Success')
     return render_template('new_donor.html', title="Register", form=form)
+
+@app.route('/register', methods=["GET", "POST"])
+def createEmployee():
+    form = CreateEmployeeForm()
+    if form.validate_on_submit():
+        staff = Staff(first_name=form.first_name.data, last_name=form.last_name.data, password=form.password.data, 
+                    email=form.email.data, role=form.role.data, location_id=form.location_id.data)
+        db.session.add(staff)
+        db.session.commit()
+        flash(f'Employee Added To Database', category='Success')
+    return render_template('new_employee.html', title="Register", form=form)

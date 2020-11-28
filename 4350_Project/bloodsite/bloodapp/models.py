@@ -11,6 +11,7 @@ class Staff(db.Model, UserMixin):
     first_name = db.Column(db.String(20), nullable=False)
     last_name = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(60), nullable=False)
+    email = db.Column(db.String(30))
     role = db.Column(db.String(25))
     location_id = db.Column(db.Integer, db.ForeignKey('bank.id'), nullable=False)
 
