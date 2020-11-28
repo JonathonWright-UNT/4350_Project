@@ -39,7 +39,8 @@ def createDonor():
 def createEmployee():
     form = CreateEmployeeForm()
     if form.validate_on_submit():
-        staff = Staff(first_name=form.first_name.data, last_name=form.last_name.data, password=form.password.data, 
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        staff = Staff(first_name=form.first_name.data, last_name=form.last_name.data, password=hashed_password, 
                     email=form.email.data, role=form.role.data, location_id=form.location_id.data)
         db.session.add(staff)
         db.session.commit()
