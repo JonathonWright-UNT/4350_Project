@@ -51,11 +51,11 @@ def createEmployee():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        staff = Staff.query.filter_by(email=form.email.data.lower()).first()
+        staff = Staff.query.filter_by(email=form.email.data).first()
         if staff and bcrypt.check_password_hash(staff.password, form.password.data):
-            login_user(staff, remember=form.remember.data)
+            login_user(staff)
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('index'))
+            flash(f'Login successful')
         else:
             flash(f'Login failed, please check email and password')
     return render_template('login.html', title="Login", form=form)

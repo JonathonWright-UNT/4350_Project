@@ -28,8 +28,6 @@ class EmployeeForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    pin = StringField('Employee ID Number',
-                           validators=[Length(min=2, max=25)])
     password = PasswordField('Password',
                              validators=[DataRequired(), Length(min=5)])
     email = StringField('Email',
