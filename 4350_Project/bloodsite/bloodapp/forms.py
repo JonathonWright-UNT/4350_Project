@@ -6,8 +6,8 @@ from bloodapp.models import Donor, Staff, Bank
 
 class EmployeeForm(FlaskForm):
 
-    # banks = Bank.query.all()
-    # bank_names = [item.location for item in banks]
+    banks = Bank.query.all()
+    bank_names = [item.location for item in banks]
 
     first_name = StringField('First Name',
                            validators=[DataRequired(), Length(min=2, max=20)])
@@ -24,7 +24,7 @@ class EmployeeForm(FlaskForm):
     role = StringField('Role',
                            validators=[Length(min=2, max=25)])
 
-    # location = SelectField('location', choices=bank_names, validators=[DataRequired()])
+    location = SelectField('location', choices=bank_names, validators=[DataRequired()])
 
     submit = SubmitField('Create User')
                
@@ -127,8 +127,8 @@ class WithdrawForm(FlaskForm):
 
 class CreateEmployeeForm(FlaskForm):
     
-    # banks = Bank.query.all()
-    # bank_names = [item.location for item in banks]
+    banks = Bank.query.all()
+    bank_names = [item.location for item in banks]
 
     first_name = StringField('First Name',
                            validators=[DataRequired(), Length(min=2, max=20)])
@@ -144,7 +144,7 @@ class CreateEmployeeForm(FlaskForm):
     role = StringField('Role',
                            validators=[Length(min=2, max=25)])
 
-    # location = SelectField('location', choices=bank_names, validators=[DataRequired()])
+    location = SelectField('location', choices=bank_names, validators=[DataRequired()])
 
     submit = SubmitField('Create Employee')
 
