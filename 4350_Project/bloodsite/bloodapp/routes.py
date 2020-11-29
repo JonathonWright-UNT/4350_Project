@@ -8,6 +8,7 @@ from bloodapp import app, db, bcrypt
 
 
 @app.route('/', methods=["GET", "POST"])
+@login_required
 def createDonor():
     form = CreateDonorForm()
     if form.validate_on_submit():
@@ -20,6 +21,7 @@ def createDonor():
 
 
 @app.route('/UpdateDonor/<int:donor_id>', methods=["GET", "POST"])
+@login_required
 def UpdateDonor(donor_id):
     donor = Donor.query.get_or_404(donor_id)
     form = UpdateDonorForm()
@@ -41,6 +43,7 @@ def UpdateDonor(donor_id):
 
 
 @app.route('/LoadDonor', methods=["GET", "POST"])
+@login_required
 def LoadDonor():
     form = DonorForm()
     donor = None
@@ -56,6 +59,7 @@ def LoadDonor():
     return render_template('load_donor.html', title="Load Donor", form=form)
 
 @app.route('/withdraw', methods=["GET", "POST"])
+@login_required
 def withdraw():
     form = WithdrawForm()
     units = None
@@ -90,6 +94,7 @@ def withdraw():
 
 
 @app.route('/DonorPage/<int:donor_id>', methods=["GET", "POST"])
+@login_required
 def DonorPage(donor_id):
     print(donor_id)
     donor = Donor.query.get_or_404(donor_id)
