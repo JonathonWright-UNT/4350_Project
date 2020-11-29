@@ -3,8 +3,8 @@ from bloodapp import db, loginManager
 from flask_login import UserMixin
 
 @loginManager.user_loader
-def load_user(user_id):
-    return Donor.query.get(int(user_id))
+def load_user(staff_id):
+    return Staff.query.get(int(staff_id))
 
 class Staff(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)

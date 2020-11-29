@@ -151,6 +151,7 @@ def login():
             login_user(staff)
             next_page = request.args.get('next')
             flash(f'Login successful')
+            return redirect(next_page) if next_page else redirect(url_for(''))
         else:
             flash(f'Login failed, please check email and password')
     return render_template('login.html', title="Login", form=form)
