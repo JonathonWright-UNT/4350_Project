@@ -48,11 +48,11 @@ def LoadDonor():
     if form.validate_on_submit():
         if form.donor_id:
             donor = Donor.query.filter_by(id=form.donor_id.data).first()
-        elif form.first_name and form.email:
-            donor = Donor.query.filter_by(first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data).first()
+    #     elif form.first_name and form.email:
+    #         donor = Donor.query.filter_by(first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data).first()
     if donor:
         return redirect(url_for('DonorPage', donor_id=donor.id))
-    elif request.method == 'POST':
+    # elif request.method == 'POST':
         flash(f'No Donor was detected')
     return render_template('load_donor.html', title="Load Donor", form=form)
 
@@ -68,7 +68,7 @@ def withdraw():
                     db.session.delete(unit)
                 db.session.commit()
             else:
-                for unit in range(form.units.data)
+                for unit in range(form.units.data):
                     db.session.delete(units[unit])
                 db.session.commit()
 
@@ -79,7 +79,7 @@ def withdraw():
                     db.session.delete(unit)
                 db.session.commit()
             else:
-                for unit in range(form.units.data)
+                for unit in range(form.units.data):
                     db.session.delete(units[unit])
                 db.session.commit()
         if units:
@@ -92,12 +92,13 @@ def withdraw():
 
 @app.route('/DonorPage/<int:donor_id>', methods=["GET", "POST"])
 def DonorPage(donor_id):
+    print(donor_id)
     donor = Donor.query.get_or_404(donor_id)
     form=DonationForm()
     if form.validate_on_submit():
         if form.donate_blood.data:
             if donor.last_blood_donation_date is None or (donor.last_blood_donation_date.timestamp() + 4838400)  < datetime.datetime.now().timestamp():
-                donation = Donation(blood_type=donor.blood_type, blood=True, plasma=False, location_id=1)
+                donation = Donation(blood_type=donor.blood_type, blood=True, plasma=False, location=1)
                 db.session.add(donor)
                 donor.last_blood_donation_date = datetime.datetime.now()
                 db.session.commit()
@@ -123,6 +124,7 @@ def DonorPage(donor_id):
                 flash(f'{Donor.first_name} will be eligable on {eligable}')
         elif form.update_donor:
             return redirect(url_for('UpdateDonor', donor_id=donor.id))
+    return render_template('donor.html', title="Donor", form=form, donor=donor)
 
 @app.route('/register', methods=["GET", "POST"])
 def createEmployee():
@@ -130,7 +132,7 @@ def createEmployee():
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         staff = Staff(first_name=form.first_name.data, last_name=form.last_name.data, password=hashed_password, 
-                    email=form.email.data, role=form.role.data, location_id=form.location_id.data)
+                    email=form.email.data, role=form.role.data, location=form.location.data)
         db.session.add(staff)
         db.session.commit()
         flash(f'Employee Added To Database', category='Success')

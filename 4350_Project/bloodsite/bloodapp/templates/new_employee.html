@@ -73,16 +73,16 @@
                 {% endif %}
             </div>
             <div class="form-group">
-                {{form.location_id.label(class="form-control-label")}}
-                {% if form.location_id.errors %}
-                    {{form.location_id(class="form-control form-control-lg is-invalid")}}
+                {{form.location.label(class="form-control-label")}}
+                {% if form.location.errors %}
+                    {{form.location(class="form-control form-control-lg is-invalid")}}
                     <div class="invalid-feedback">
-                        {% for error in form.location_id.errors %}
+                        {% for error in form.location.errors %}
                             <span>{{ error }}</span>
                         {% endfor %}
                     </div>
                 {% else %}
-                {{form.location_id(class="form-control form-control-lg")}}
+                {{form.location(class="form-control form-control-lg")}}
                 {% endif %}
             </div>
             <div class="form-group">

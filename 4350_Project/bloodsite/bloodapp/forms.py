@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from bloodapp.models import Donor, Staff
+from bloodapp.models import Donor, Staff, Bank
 
 
 class EmployeeForm(FlaskForm):
@@ -48,9 +48,6 @@ class CreateDonorForm(FlaskForm):
                            validators=[DataRequired(), Length(min=2, max=20)])
 
     last_name = StringField('Last Name',
-                           validators=[DataRequired(), Length(min=2, max=20)])
-
-    password = StringField('Password',
                            validators=[DataRequired(), Length(min=2, max=20)])
 
     age = IntegerField('Age', validators=[DataRequired()])
