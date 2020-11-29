@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">
+                Please enter how many units you are requesting of blood or plasma.
+                If we currently do not have that amount we will send you the rest of what we do have.
+            </legend>
+            <div class="form-group">
+                {{form.blood_type.label(class="form-control-label")}}
+                {% if form.blood_type.errors %}
+                    {{form.blood_type(class="form-control form-control-lg is-invalid")}}
+                    <div class="invalid-feedback">
+                        {% for error in form.blood_type.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                {{form.blood_type(class="form-control form-control-lg")}}
+                {% endif %}       
+            </div>
+            <div class="form-group">
+                {{form.blood_or_plasma.label(class="form-control-label")}}
+                {% if form.blood_or_plasma.errors %}
+                    {{form.blood_or_plasma(class="form-control form-control-lg is-invalid")}}
+                    <div class="invalid-feedback">
+                        {% for error in form.blood_or_plasma.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                {{form.blood_or_plasma(class="form-control form-control-lg")}}
+                {% endif %}       
+            </div>
+            <div class="form-group">
+                Please either enter a number or the word All
+                {{form.units.label(class="form-control-label")}}
+                {% if form.units.errors %}
+                    {{form.units(class="form-control form-control-lg is-invalid")}}
+                    <div class="invalid-feedback">
+                        {% for error in form.units.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                {{form.units(class="form-control form-control-lg")}}
+                {% endif %}       
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info")}}
+            </div>
+            
+        </fieldset>
+    </form>
+</div>
+{% endblock content %}

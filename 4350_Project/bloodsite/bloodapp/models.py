@@ -13,7 +13,7 @@ class Staff(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     email = db.Column(db.String(30))
     role = db.Column(db.String(25))
-    location_id = db.Column(db.Integer, db.ForeignKey('bank.id'), nullable=False)
+    location = db.Column(db.String(25), nullable=False)
 
 
     def __repr__(self):
@@ -42,7 +42,7 @@ class Donation(db.Model):
     blood = db.Column(db.Boolean, nullable=False)
     plasma = db.Column(db.Boolean, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    location_id = db.Column(db.Integer, db.ForeignKey('bank.id'), nullable=False)
+    location = db.Column(db.String(25), nullable=False)
 
     def __repr__(self):
         return f"Post('{self.blood_type},')"
