@@ -87,7 +87,23 @@ class UpdateDonorForm(FlaskForm):
         elif donor:
             raise ValidationError('A donor with that email already exists')
 
+    
+class CreateBankForm(FlaskForm):
+    bankID = StringField('Bank ID', validators=[DataRequired()])
 
+    location = StringField('Location', validators=[Length(min=2, max=25)])
+    
+    manager = StringField('Location', validators=[Length(min=2, max=25)])
+
+    submit = SubmitField('Create Bank')
+    
+    def validate_bankID(self, bankID):
+        bank = Bank.query.filter_by(bankID=bankID.data).first()
+        if bank.bankID == self.bankID.data
+            return
+        elif bank:
+            raise ValidationError('A Bank with this ID already exists')
+    
 
 class DonorForm(FlaskForm):
     donor_id = StringField('Donor ID', validators=[])
