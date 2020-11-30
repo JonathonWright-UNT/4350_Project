@@ -40,7 +40,7 @@ class LoginForm(FlaskForm):
 
 
 class CreateDonorForm(FlaskForm):
-    bloods = ['O−',	'O+', 'A−', 'A+', 'B−', 'B+', 'AB−', 'AB+']
+    bloods = ['O-',	'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+']
 
     blood_type = SelectField('blood_type', choices=bloods, validators=[InputRequired()])
     
@@ -52,7 +52,7 @@ class CreateDonorForm(FlaskForm):
 
     age = IntegerField('Age', validators=[InputRequired()])
     
-    email = StringField('Email', validators=[InputRequired()])
+    email = StringField('Email', validators=[InputRequired(), Email(check_deliverability=True)])
 
     submit = SubmitField('Create Donor')
 
@@ -64,7 +64,7 @@ class CreateDonorForm(FlaskForm):
 
 
 class UpdateDonorForm(FlaskForm):
-    bloods = ['O−',	'O+', 'A−', 'A+', 'B−', 'B+', 'AB−', 'AB+']
+    bloods = ['O-',	'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+']
 
     blood_type = SelectField('blood_type', choices=bloods, validators=[InputRequired()])
     
@@ -76,7 +76,7 @@ class UpdateDonorForm(FlaskForm):
 
     age = IntegerField('Age', validators=[InputRequired()])
     
-    email = StringField('Email', validators=[InputRequired()])
+    email = StringField('Email', validators=[InputRequired(Email(check_deliverability=True))])
 
     submit = SubmitField(f'Update Donor')
 
@@ -149,6 +149,7 @@ class CreateEmployeeForm(FlaskForm):
     
     banks = Bank.query.all()
     bank_names = [item.location for item in banks]
+    roles = ["Nurse", "Doctor", "Admin"]
 
     first_name = StringField('First Name',
                            validators=[DataRequired(), Length(min=2, max=20)])
@@ -156,13 +157,15 @@ class CreateEmployeeForm(FlaskForm):
     last_name = StringField('Last Name',
                            validators=[DataRequired(), Length(min=2, max=20)])
 
-    password = StringField('Password',
-                           validators=[DataRequired(), Length(min=5, max=20)])
+    password = PasswordField('Password',
+                             validators=[DataRequired(), Length(min=5)])
+                             
+    confirm_password = PasswordField('Confirm Password',
+                             validators=[DataRequired(), Length(min=5), EqualTo('password')])
     
     email = StringField('Email', validators=[DataRequired()])
 
-    role = StringField('Role',
-                           validators=[Length(min=2, max=25)])
+    role = SelectField('Role', choices=roles, validators=[DataRequired()])
 
     location = SelectField('location', choices=bank_names, validators=[DataRequired()])
 
@@ -172,6 +175,36 @@ class CreateEmployeeForm(FlaskForm):
         staff = Staff.query.filter_by(email=email.data).first()
         if staff:
             raise ValidationError('An employee with that email already exists')
+
+class BankForm(FlaskForm):
+    location = StringField('Location Name',
+                           validators=[DataRequired(), Length(min=2, max=20)])
+
+    manager_id = IntegerField('Manager ID',
+                           validators=[DataRequired()])
+    
+    submit = SubmitField('Create  Bank')
+
+    def validate_location(self, location):
+        bank = Bank.query.filter_by(email=email.data).first()
+        if bank:
+            raise ValidationError('A bank already exists at that location')
+
+class RequestResetForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired()])
+    submit = SubmitField('Request Password Reset')
+    
+    def validate_email(self, email):
+        staff = Staff.query.filter_by(email=email.data).first()
+        if staff is None:
+            raise ValidationError('There is no account with that email. You must register first.')    
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password',
+                             validators=[DataRequired(), Length(min=5)])
+    confirm_password = PasswordField('Confirm Password',
+                             validators=[DataRequired(), Length(min=5), EqualTo('password')])
+    submit = SubmitField('Reset Password')                    
 
 class UpdateEmployeeForm(FlaskForm):
     
@@ -184,11 +217,11 @@ class UpdateEmployeeForm(FlaskForm):
     last_name = StringField('Last Name',
                            validators=[DataRequired(), Length(min=2, max=20)])
 
-    password = StringField('Password')
+    # password = StringField('Password')
     
     email = StringField('Email', validators=[DataRequired()])
 
-    role = StringField('Role',
+    role = SelectField('Role',
                            validators=[Length(min=2, max=25)])
 
     location = SelectField('location', choices=bank_names, validators=[DataRequired()])

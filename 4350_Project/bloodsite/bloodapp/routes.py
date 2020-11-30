@@ -1,9 +1,11 @@
 import datetime
 from flask import render_template, url_for, flash, redirect, request
 from flask_login import login_user, current_user, logout_user, login_required
-from bloodapp.forms import CreateDonorForm, UpdateDonorForm, DonorForm, DonationForm, WithdrawForm, CreateEmployeeForm, LoginForm, UpdateEmployeeForm
+from flask_mail import Message
+from bloodapp.forms import CreateDonorForm, UpdateDonorForm, DonorForm, DonationForm, RequestResetForm, ResetPasswordForm
+from bloodapp.forms import WithdrawForm, CreateEmployeeForm, LoginForm, UpdateEmployeeForm, BankForm
 from bloodapp.models import Donor, Staff, Donation, Bank
-from bloodapp import app, db, bcrypt
+from bloodapp import app, db, bcrypt, mail
 
 
 
@@ -16,8 +18,19 @@ def createDonor():
                     age=form.age.data, blood_type=form.blood_type.data)
         db.session.add(donor)
         db.session.commit()
+        send_reset_email(donor)
         flash(f'Donor Added To database,', category='Success')
+        return redirect(url_for('DonorPage', donor_id=donor.id))
     return render_template('new_donor.html', title="Register", form=form)
+
+def send_reset_email(donor):
+    msg = Message('New Donor ID', 
+                   sender='NoReplyBloodBank@my.unt.edu', 
+                   recipients=[donor.email])
+    msg.body = f"""Thank you, {donor.first_name} for choosing to donate blood!
+                   Your Donor ID is {donor.id}
+                   We appreciate your blood!"""
+    mail.send(msg)
 
 @app.route('/logout')
 def logout():
@@ -62,11 +75,93 @@ def LoadDonor():
             flash(f'No Donor was detected')
     return render_template('load_donor.html', title="Load Donor", form=form)
 
+def send_reset_email(staff):
+    token = staff.get_reset_token()
+    msg = Message('Password Reset Request', 
+                   sender='NoReplyBloodBank@my.unt.edu', 
+                   recipients=[staff.email])
+    msg.body = f"""To reset your password, visit the following link:
+{url_for('reset_token', token=token, _external=True)}
+If you did not make this request, then simply record this email and no changes will be made."""
+    mail.send(msg)
+    
+@app.route("/reset_password", methods=["GET", "POST"])
+def reset_request():
+    if current_user.is_authenticated:
+        return redirect('/home')
+    form = RequestResetForm()
+    if form.validate_on_submit():
+        staff = Staff.query.filter_by(email=form.email.data).first()
+        send_reset_email(staff)
+        flash('An email has been sent with instructions to reset your password.', 'info')
+        return redirect(url_for('login'))
+    return render_template('reset_request.html', title='Reset Password',
+                           form=form)
+                          
+@app.route("/reset_password/<token>", methods=['GET', 'POST'])
+def reset_token(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('LoadDonor'))
+    staff = Staff.verify_reset_token(token)
+    if staff is None:
+        flash('That is an invalid or expired token', 'warning')
+        return redirect(url_for('reset_request'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        staff.password = hashed_password
+        db.session.commit()
+        flash('Your password has been updated! You are now able to log in', 'success')
+        return redirect(url_for('login'))
+    return render_template('reset_token.html', title='Reset Password', form=form)                        
+ 
+
+@app.route('/CreateBank', methods=["GET", "POST"])
+@login_required
+def CreateBank():
+    form = BankForm()
+    banks = Bank.query.all()
+    table = {}
+    for bank in banks:
+        manager = Staff.query.filter_by(id=bank.manager_id).first()
+        table.update({bank.location: {
+            "id": bank.id,
+            "location": bank.location,
+            "manager": f"{manager.first_name.capitalize()} {manager.last_name.capitalize()}"
+        }})
+    if form.validate_on_submit():
+        new_bank = Bank(location=form.location.data, manager_id=form.manager_id.data)
+        db.session.add(new_bank)
+        db.session.commit()
+        flash(f'New Bank Created')
+    return render_template('bank.html', title="Bank Page", form=form, table=table)
+
 @app.route('/withdraw', methods=["GET", "POST"])
 @login_required
 def withdraw():
     form = WithdrawForm()
     units = None
+    all_donations = {}
+    donations = Donation.query.all()
+    for item in donations:
+        if item.location not in all_donations:
+            all_donations.update({item.location: {}})
+        if item.blood:
+            entry = f"Blood Type {item.blood_type}"
+            if entry not in all_donations[item.location]:
+                all_donations[item.location].update({entry: {
+                    "location": str(item.location),
+                    "type": entry,
+                    "count": 0}})
+            all_donations[item.location][entry]["count"] += 1
+        elif item.plasma:
+            entry = f"Plasma Type {item.blood_type}"
+            if entry not in all_donations[item.location]:
+                all_donations[item.location].update({entry: {
+                    "location": str(item.location),
+                    "type": entry,
+                    "count": 0}})
+            all_donations[item.location][entry]["count"] += 1
     if form.validate_on_submit():
         shipped = 0
         if form.blood_or_plasma.data == 'Blood':
@@ -100,10 +195,11 @@ def withdraw():
                 shipped = units_required
 
         if len(units) > 0:
-            flash(f'We have shipped {shipped} units')
+            flash(f'We have shipped {shipped} units', category='Success')
+            render_template('withdraw.html', title="withdraw", form=form, all_donations=all_donations)
         elif len(units) == 0:
             flash(f'We currently have no units of that type')
-    return render_template('withdraw.html', title="withdraw", form=form)
+    return render_template('withdraw.html', title="withdraw", form=form, all_donations=all_donations)
 
 
 @app.route('/DonorPage/<int:donor_id>', methods=["GET", "POST"])
@@ -162,17 +258,7 @@ def UpdateEmployee():
     if form.validate_on_submit():
         staff.first_name=form.first_name.data
         staff.last_name=form.last_name.data
-        password_updated = 1
-        if form.password.data != '':
-            if len(form.password.data) > 4 and len(form.password.data) < 21:
-                hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-                staff.password=hashed_password
-                password_updated = 1
-            else:
-                flash(f'Password not updated. Please enter password ranging from 5-20 characters.', category='Success')
-                password_updated = 0
         staff.email=form.email.data
-        staff.role=form.role.data
         staff.location=form.location.data
         db.session.commit()
         if password_updated != 0:
@@ -181,7 +267,7 @@ def UpdateEmployee():
         form.first_name.data=staff.first_name
         form.last_name.data=staff.last_name
         form.email.data=staff.email
-        form.role.data=staff.role
+        form.role.choices=[staff.role]
         form.location.data=staff.location
     return render_template('update_employee.html', title="Update Employee", form=form)
 
