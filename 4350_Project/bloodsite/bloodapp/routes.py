@@ -1,7 +1,7 @@
 import datetime
 from flask import render_template, url_for, flash, redirect, request
 from flask_login import login_user, current_user, logout_user, login_required
-from bloodapp.forms import CreateDonorForm, UpdateDonorForm, DonorForm, DonationForm, WithdrawForm, CreateEmployeeForm, LoginForm
+from bloodapp.forms import CreateDonorForm, UpdateDonorForm, DonorForm, DonationForm, WithdrawForm, CreateEmployeeForm, LoginForm, UpdateEmployeeForm
 from bloodapp.models import Donor, Staff, Donation, Bank
 from bloodapp import app, db, bcrypt
 
@@ -141,6 +141,27 @@ def createEmployee():
         db.session.commit()
         flash(f'Employee Added To Database', category='Success')
     return render_template('new_employee.html', title="Register", form=form)
+
+@app.route('/account', methods=["GET", "POST"])
+@login_required
+def UpdateEmployee():
+    staff = current_user
+    form = UpdateEmployeeForm()
+    if form.validate_on_submit():
+        staff.first_name=form.first_name.data
+        staff.last_name=form.last_name.data
+        staff.email=form.email.data
+        staff.role=form.role.data
+        staff.location=form.location.data
+        db.session.commit()
+        flash(f'Donor Updated', category='Success')
+    elif request.method == 'GET':
+        form.first_name.data=staff.first_name
+        form.last_name.data=staff.last_name
+        form.email.data=staff.email
+        form.role.data=staff.role
+        form.location.data=staff.location
+    return render_template('update_employee.html', title="Update Employee", form=form)
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
