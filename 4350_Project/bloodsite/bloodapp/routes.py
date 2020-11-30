@@ -1,7 +1,7 @@
 import datetime
 from flask import render_template, url_for, flash, redirect, request
 from flask_login import login_user, current_user, logout_user, login_required
-from bloodapp.forms import CreateDonorForm, UpdateDonorForm, DonorForm, DonationForm, WithdrawForm, CreateEmployeeForm, LoginForm
+from bloodapp.forms import CreateDonorForm, UpdateDonorForm, DonorForm, DonationForm, WithdrawForm, CreateEmployeeForm, LoginForm, UpdateEmployeeForm
 from bloodapp.models import Donor, Staff, Donation, Bank
 from bloodapp import app, db, bcrypt
 
@@ -154,6 +154,37 @@ def createEmployee():
         flash(f'Employee Added To Database', category='Success')
     return render_template('new_employee.html', title="Register", form=form)
 
+@app.route('/account', methods=["GET", "POST"])
+@login_required
+def UpdateEmployee():
+    staff = current_user
+    form = UpdateEmployeeForm()
+    if form.validate_on_submit():
+        staff.first_name=form.first_name.data
+        staff.last_name=form.last_name.data
+        password_updated = 1
+        if form.password.data != '':
+            if len(form.password.data) > 4 and len(form.password.data) < 21:
+                hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+                staff.password=hashed_password
+                password_updated = 1
+            else:
+                flash(f'Password not updated. Please enter password ranging from 5-20 characters.', category='Success')
+                password_updated = 0
+        staff.email=form.email.data
+        staff.role=form.role.data
+        staff.location=form.location.data
+        db.session.commit()
+        if password_updated != 0:
+            flash(f'Donor Updated', category='Success')
+    elif request.method == 'GET':
+        form.first_name.data=staff.first_name
+        form.last_name.data=staff.last_name
+        form.email.data=staff.email
+        form.role.data=staff.role
+        form.location.data=staff.location
+    return render_template('update_employee.html', title="Update Employee", form=form)
+
 @app.route('/login', methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
@@ -169,3 +200,4 @@ def login():
         else:
             flash(f'Login failed, please check email and password')
     return render_template('login.html', title="Login", form=form)
+

@@ -82,6 +82,8 @@ class UpdateDonorForm(FlaskForm):
 
     def validate_email(self, email):
         donor = Donor.query.filter_by(email=email.data).first()
+        if donor.email == self.email.data:
+            return
         if donor.first_name == self.first_name.data and donor.last_name == self.last_name.data:
             return
         elif donor:
@@ -155,7 +157,7 @@ class CreateEmployeeForm(FlaskForm):
                            validators=[DataRequired(), Length(min=2, max=20)])
 
     password = StringField('Password',
-                           validators=[DataRequired(), Length(min=2, max=20)])
+                           validators=[DataRequired(), Length(min=5, max=20)])
     
     email = StringField('Email', validators=[DataRequired()])
 
@@ -170,4 +172,35 @@ class CreateEmployeeForm(FlaskForm):
         staff = Staff.query.filter_by(email=email.data).first()
         if staff:
             raise ValidationError('An employee with that email already exists')
+
+class UpdateEmployeeForm(FlaskForm):
+    
+    banks = Bank.query.all()
+    bank_names = [item.location for item in banks]
+
+    first_name = StringField('First Name',
+                           validators=[DataRequired(), Length(min=2, max=20)])
+
+    last_name = StringField('Last Name',
+                           validators=[DataRequired(), Length(min=2, max=20)])
+
+    password = StringField('Password')
+    
+    email = StringField('Email', validators=[DataRequired()])
+
+    role = StringField('Role',
+                           validators=[Length(min=2, max=25)])
+
+    location = SelectField('location', choices=bank_names, validators=[DataRequired()])
+
+    submit = SubmitField('Update Employee')
+
+    def validate_email(self, email):
+        staff = Staff.query.filter_by(email=email.data).first()
+        if staff.email == self.email.data:
+            return
+        if staff.first_name == self.first_name.data and staff.last_name == self.last_name.data:
+            return
+        elif staff:
+            raise ValidationError('A donor with that email already exists')
 
