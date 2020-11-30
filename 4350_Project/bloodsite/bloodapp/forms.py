@@ -82,6 +82,8 @@ class UpdateDonorForm(FlaskForm):
 
     def validate_email(self, email):
         donor = Donor.query.filter_by(email=email.data).first()
+        if donor.email == self.email.data:
+            return
         if donor.first_name == self.first_name.data and donor.last_name == self.last_name.data:
             return
         elif donor:
