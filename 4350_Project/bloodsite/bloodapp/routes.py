@@ -6,7 +6,6 @@ from bloodapp.models import Donor, Staff, Donation, Bank
 from bloodapp import app, db, bcrypt
 
 
-
 @app.route('/', methods=["GET", "POST"])
 @login_required
 def createDonor():
@@ -150,11 +149,21 @@ def UpdateEmployee():
     if form.validate_on_submit():
         staff.first_name=form.first_name.data
         staff.last_name=form.last_name.data
+        password_updated = 1
+        if form.password.data != '':
+            if len(form.password.data) > 4 and len(form.password.data) < 21:
+                hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+                staff.password=hashed_password
+                password_updated = 1
+            else:
+                flash(f'Password not updated. Please enter password ranging from 5-20 characters.', category='Success')
+                password_updated = 0
         staff.email=form.email.data
         staff.role=form.role.data
         staff.location=form.location.data
         db.session.commit()
-        flash(f'Donor Updated', category='Success')
+        if password_updated != 0:
+            flash(f'Donor Updated', category='Success')
     elif request.method == 'GET':
         form.first_name.data=staff.first_name
         form.last_name.data=staff.last_name
@@ -176,3 +185,4 @@ def login():
         else:
             flash(f'Login failed, please check email and password')
     return render_template('login.html', title="Login", form=form)
+

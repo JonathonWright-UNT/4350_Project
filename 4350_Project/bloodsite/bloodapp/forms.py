@@ -139,7 +139,7 @@ class CreateEmployeeForm(FlaskForm):
                            validators=[DataRequired(), Length(min=2, max=20)])
 
     password = StringField('Password',
-                           validators=[DataRequired(), Length(min=2, max=20)])
+                           validators=[DataRequired(), Length(min=5, max=20)])
     
     email = StringField('Email', validators=[DataRequired()])
 
@@ -166,8 +166,7 @@ class UpdateEmployeeForm(FlaskForm):
     last_name = StringField('Last Name',
                            validators=[DataRequired(), Length(min=2, max=20)])
 
-    password = StringField('Password',
-                           validators=[DataRequired(), Length(min=2, max=20)])
+    password = StringField('Password')
     
     email = StringField('Email', validators=[DataRequired()])
 
