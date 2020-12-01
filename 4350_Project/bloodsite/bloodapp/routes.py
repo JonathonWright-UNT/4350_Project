@@ -265,16 +265,15 @@ def UpdateEmployee():
     staff = current_user
     form = UpdateEmployeeForm()
     if form.validate_on_submit():
-        staff.first_name=form.first_name.data
-        staff.last_name=form.last_name.data
+        staff.first_name=form.first_name.data.lower()
+        staff.last_name=form.last_name.data.lower()
         staff.email=form.email.data
         staff.location=form.location.data
         db.session.commit()
-        # if password_updated != 0:
         flash(f'Employee Updated', category='Success')
     elif request.method == 'GET':
-        form.first_name.data=staff.first_name
-        form.last_name.data=staff.last_name
+        form.first_name.data=staff.first_name.capitalize()
+        form.last_name.data=staff.last_name.capitalize()
         form.email.data=staff.email
         form.role.choices=[staff.role]
         form.location.data=staff.location
