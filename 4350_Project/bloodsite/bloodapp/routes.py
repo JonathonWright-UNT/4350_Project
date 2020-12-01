@@ -30,7 +30,10 @@ def send_donor_email(donor):
     msg.body = f"""Thank you, {donor.first_name} for choosing to donate blood!
                    Your Donor ID is {donor.id}
                    We appreciate your blood!"""
-    mail.send(msg)
+    try:
+        mail.send(msg)
+    except Exception as e:
+        pass
 
 @app.route('/logout')
 def logout():
@@ -83,8 +86,10 @@ def send_reset_email(staff):
     msg.body = f"""To reset your password, visit the following link:
 {url_for('reset_token', token=token, _external=True)}
 If you did not make this request, then simply record this email and no changes will be made."""
-    mail.send(msg)
-    
+    try:
+        mail.send(msg)
+    except Exception as e:
+        pass
 @app.route("/reset_password", methods=["GET", "POST"])
 def reset_request():
     if current_user.is_authenticated:
