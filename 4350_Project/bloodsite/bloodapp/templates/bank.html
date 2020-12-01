@@ -47,7 +47,7 @@
             <th scope="col">Manager</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody>        
             {% for item in table %}
             <tr>
                 <th scope="row">{{ table[item]["id"] }}</th>
@@ -57,5 +57,12 @@
             {% endfor %}
         </tbody>
       </table>
+      {% for page_num in banks.iter_pages() %}
+                {% if banks.page == page_num %}
+                    <a class="btn btn-info mb-4" href="{{ url_for('CreateBank', page=page_num) }}"><small>{{ page_num }}</small></a>
+                {% else %}
+                    <a class="btn btn-outline-info mb-4" href="{{ url_for('CreateBank', page=page_num) }}"><small>{{ page_num }}</small></a>
+                {% endif %}
+            {% endfor %}
 </div>
 {% endblock content %}
