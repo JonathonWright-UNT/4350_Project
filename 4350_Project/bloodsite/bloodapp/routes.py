@@ -19,7 +19,7 @@ def createDonor():
         db.session.add(donor)
         db.session.commit()
         send_donor_email(donor)
-        flash(f'Donor Added To database,', category='Success')
+        flash(f'Donor Added To Database', category='Success')
         return redirect(url_for('DonorPage', donor_id=donor.id))
     return render_template('new_donor.html', title="Register", form=form)
 
