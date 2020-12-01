@@ -18,12 +18,12 @@ def createDonor():
                     age=form.age.data, blood_type=form.blood_type.data)
         db.session.add(donor)
         db.session.commit()
-        send_reset_email(donor)
+        send_donor_email(donor)
         flash(f'Donor Added To database,', category='Success')
         return redirect(url_for('DonorPage', donor_id=donor.id))
     return render_template('new_donor.html', title="Register", form=form)
 
-def send_reset_email(donor):
+def send_donor_email(donor):
     msg = Message('New Donor ID', 
                    sender='NoReplyBloodBank@my.unt.edu', 
                    recipients=[donor.email])
@@ -134,6 +134,7 @@ def CreateBank():
         db.session.add(new_bank)
         db.session.commit()
         flash(f'New Bank Created')
+        return redirect(url_for('CreateBank'))
     return render_template('bank.html', title="Bank Page", form=form, table=table)
 
 @app.route('/withdraw', methods=["GET", "POST"])
@@ -196,7 +197,7 @@ def withdraw():
 
         if len(units) > 0:
             flash(f'We have shipped {shipped} units', category='Success')
-            render_template('withdraw.html', title="withdraw", form=form, all_donations=all_donations)
+            return redirect(url_for('withdraw'))
         elif len(units) == 0:
             flash(f'We currently have no units of that type')
     return render_template('withdraw.html', title="withdraw", form=form, all_donations=all_donations)
@@ -211,8 +212,9 @@ def DonorPage(donor_id):
         if form.donate_blood.data:
             if donor.last_blood_donation_date is None or (donor.last_blood_donation_date.timestamp() + 4838400)  < datetime.datetime.now().timestamp():
                 donation = Donation(blood_type=donor.blood_type, blood=True, plasma=False, location=current_user.location)
-                db.session.add(donor)
+                db.session.add(donation)
                 donor.last_blood_donation_date = datetime.datetime.now()
+                db.session.add(donor)
                 db.session.commit()
                 flash(f'Blood Donated!', category='Success')
             else:
@@ -224,8 +226,9 @@ def DonorPage(donor_id):
         elif form.donate_plasma.data:
             if donor.last_plasma_donation_date is None or (donor.last_plasma_donation_date.timestamp() + 2419200)  < datetime.datetime.now().timestamp():
                 donation = Donation(blood_type=donor.blood_type, blood=False, plasma=True, location=current_user.location)
-                db.session.add(donor)
+                db.session.add(donation)
                 donor.last_plasma_donation_date = datetime.datetime.now()
+                db.session.add(donor)
                 db.session.commit()
                 flash(f'Plasma Donated!', category='Success')
             else:
@@ -261,8 +264,8 @@ def UpdateEmployee():
         staff.email=form.email.data
         staff.location=form.location.data
         db.session.commit()
-        if password_updated != 0:
-            flash(f'Donor Updated', category='Success')
+        # if password_updated != 0:
+        flash(f'Employee Updated', category='Success')
     elif request.method == 'GET':
         form.first_name.data=staff.first_name
         form.last_name.data=staff.last_name
@@ -270,6 +273,11 @@ def UpdateEmployee():
         form.role.choices=[staff.role]
         form.location.data=staff.location
     return render_template('update_employee.html', title="Update Employee", form=form)
+
+@app.route('/')
+@app.route('/home')
+def home():
+    return render_template('home.html', title="Home")
 
 @app.route('/login', methods=["GET", "POST"])
 def login():

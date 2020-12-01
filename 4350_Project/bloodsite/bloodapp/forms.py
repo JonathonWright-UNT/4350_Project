@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, InputRequired, Optional
 from bloodapp.models import Donor, Staff, Bank
@@ -82,11 +83,11 @@ class UpdateDonorForm(FlaskForm):
 
     def validate_email(self, email):
         donor = Donor.query.filter_by(email=email.data).first()
-        if donor.email == self.email.data:
-            return
-        if donor.first_name == self.first_name.data and donor.last_name == self.last_name.data:
-            return
-        elif donor:
+        if donor:
+            if donor.email == self.email.data:
+                return
+            if donor.first_name == self.first_name.data and donor.last_name == self.last_name.data:
+                return
             raise ValidationError('A donor with that email already exists')
 
 
@@ -186,7 +187,7 @@ class BankForm(FlaskForm):
     submit = SubmitField('Create  Bank')
 
     def validate_location(self, location):
-        bank = Bank.query.filter_by(email=email.data).first()
+        bank = Bank.query.filter_by(location=location.data).first()
         if bank:
             raise ValidationError('A bank already exists at that location')
 
@@ -210,6 +211,7 @@ class UpdateEmployeeForm(FlaskForm):
     
     banks = Bank.query.all()
     bank_names = [item.location for item in banks]
+    roles = ["Nurse", "Doctor", "Admin"]
 
     first_name = StringField('First Name',
                            validators=[DataRequired(), Length(min=2, max=20)])
@@ -221,7 +223,7 @@ class UpdateEmployeeForm(FlaskForm):
     
     email = StringField('Email', validators=[DataRequired()])
 
-    role = SelectField('Role',
+    role = SelectField('Role', choices=roles,
                            validators=[Length(min=2, max=25)])
 
     location = SelectField('location', choices=bank_names, validators=[DataRequired()])
@@ -230,10 +232,11 @@ class UpdateEmployeeForm(FlaskForm):
 
     def validate_email(self, email):
         staff = Staff.query.filter_by(email=email.data).first()
-        if staff.email == self.email.data:
-            return
-        if staff.first_name == self.first_name.data and staff.last_name == self.last_name.data:
-            return
+        if staff:
+            if staff.email == current_user.email:
+                return
+            if staff.first_name == self.first_name.data and staff.last_name == self.last_name.data:
+                return
         elif staff:
             raise ValidationError('A donor with that email already exists')
 
