@@ -225,9 +225,9 @@ def DonorPage(donor_id):
             else:
                 last_donation = donor.last_blood_donation_date
                 e = datetime.timedelta(weeks=8)
-                eligable = last_donation + e
+                eligible = last_donation + e
                 flash(f'Donor not yet eligible to donate')
-                flash(f'{donor.first_name} will be eligable on {eligable}')
+                flash(f'{donor.first_name} will be eligible on {eligible}')
         elif form.donate_plasma.data:
             if donor.last_plasma_donation_date is None or (donor.last_plasma_donation_date.timestamp() + 2419200)  < datetime.datetime.now().timestamp():
                 donation = Donation(blood_type=donor.blood_type, blood=False, plasma=True, location=current_user.location)
@@ -239,9 +239,9 @@ def DonorPage(donor_id):
             else:
                 last_donation = donor.last_plasma_donation_date
                 e = datetime.timedelta(weeks=4)
-                eligable = last_donation + e
+                eligible = last_donation + e
                 flash(f'Donor not yet eligible to donate')
-                flash(f'{donor.first_name} will be eligable on {eligable}')
+                flash(f'{donor.first_name} will be eligible on {eligible}')
         elif form.update_donor:
             return redirect(url_for('UpdateDonor', donor_id=donor.id))
     return render_template('donor.html', title="Donor", form=form, donor=donor)
