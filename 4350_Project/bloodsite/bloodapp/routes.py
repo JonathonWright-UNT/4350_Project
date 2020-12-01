@@ -124,10 +124,11 @@ def reset_token(token):
 @app.route('/CreateBank', methods=["GET", "POST"])
 @login_required
 def CreateBank():
+    page_num = request.args.get('page', 1, type=int)
     form = BankForm()
-    banks = Bank.query.all()
+    banks = Bank.query.paginate(per_page=5, page=page_num)
     table = {}
-    for bank in banks:
+    for bank in banks.items:
         manager = Staff.query.filter_by(id=bank.manager_id).first()
         table.update({bank.location: {
             "id": bank.id,
@@ -140,7 +141,7 @@ def CreateBank():
         db.session.commit()
         flash(f'New Bank Created')
         return redirect(url_for('CreateBank'))
-    return render_template('bank.html', title="Bank Page", form=form, table=table)
+    return render_template('bank.html', title="Bank Page", form=form, table=table, banks=banks)
 
 @app.route('/withdraw', methods=["GET", "POST"])
 @login_required
