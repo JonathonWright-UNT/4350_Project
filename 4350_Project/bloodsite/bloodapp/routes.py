@@ -251,6 +251,7 @@ def createEmployee():
         db.session.add(staff)
         db.session.commit()
         flash(f'Employee Added To Database', category='Success')
+        return redirect(url_for('login'))
     return render_template('new_employee.html', title="Register", form=form)
 
 @app.route('/account', methods=["GET", "POST"])
