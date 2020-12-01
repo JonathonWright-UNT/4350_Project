@@ -132,8 +132,8 @@ class DonationForm(FlaskForm):
 class WithdrawForm(FlaskForm):
     bloods = ['O-',	'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+']
     options = ['Blood', 'Plasma']
-    blood_type = SelectField('blood_type', choices=bloods, validators=[DataRequired()])
-    blood_or_plasma = SelectField('blood_or_plasma', choices=options, validators=[DataRequired()])
+    blood_type = SelectField('Blood Type', choices=bloods, validators=[DataRequired()])
+    blood_or_plasma = SelectField('Blood or Plasma', choices=options, validators=[DataRequired()])
     units = StringField('units', validators=[DataRequired()])
     submit = SubmitField('Confirm')
 
