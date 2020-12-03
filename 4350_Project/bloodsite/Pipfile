@@ -7,8 +7,12 @@ verify_ssl = true
 
 [packages]
 flask = "*"
-flask-wtf = "*"
-flask-sqlalchemy = "*"
-wtforms[email] = "*"
+flask_sqlalchemy = "*"
+flask_bcrypt = "*"
+flask_login = "*"
+flask_mail = "*"
+flask_wtf = "*"
+"wtforms[email]" = "*"
+
 [requires]
 python_version = "3.8"
