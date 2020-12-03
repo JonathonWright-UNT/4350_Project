@@ -1,5 +1,6 @@
 from datetime import datetime
-from bloodapp import db, loginManager
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from bloodapp import db, loginManager, app
 from flask_login import UserMixin
 
 @loginManager.user_loader
@@ -15,6 +16,18 @@ class Staff(db.Model, UserMixin):
     role = db.Column(db.String(25))
     location = db.Column(db.String(25), nullable=False)
 
+    def get_reset_token(self, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        return s.dumps({'user_id': self.id}).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            staff_id = s.loads(token)['staff_id']
+        except:
+            return None
+        return Staff.query.get(user_id)
 
     def __repr__(self):
         return f"Staff ('{self.first_name}', '{self.last_name}', '{self.role}')"

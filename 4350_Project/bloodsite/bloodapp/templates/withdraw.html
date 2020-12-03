@@ -51,8 +51,30 @@
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info")}}
             </div>
-            
         </fieldset>
     </form>
+    
+    <table class="table">
+        Current Supply
+        <thead>
+          <tr>
+            <th scope="col">Location</th>
+            <th scope="col">Type</th>
+            <th scope="col">Units</th>
+          </tr>
+        </thead>
+        {% for location in all_donations %}
+        <tbody>
+            {% for item in all_donations[location] %}
+            <tr>
+                <td>{{ all_donations[location][item]["location"] }}</td>
+                <td>{{ all_donations[location][item]["type"] }}</td>
+                <td>{{ all_donations[location][item]["count"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        {% endfor %}
+      </table>
+
 </div>
 {% endblock content %}

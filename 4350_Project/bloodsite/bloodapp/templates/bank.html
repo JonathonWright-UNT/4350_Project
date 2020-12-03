@@ -5,78 +5,64 @@
         {{ form.hidden_tag() }}
         <fieldset class="form-group">
             <legend class="border-bottom mb-4">
-                Add Staff To Database
+                Create A New Bank
             </legend>
             <div class="form-group">
-                {{form.first_name.label(class="form-control-label")}}
-                {% if form.first_name.errors %}
-                    {{form.first_name(class="form-control form-control-lg is-invalid")}}
+                {{form.location.label(class="form-control-label")}}
+                {% if form.location.errors %}
+                    {{form.location(class="form-control form-control-lg is-invalid")}}
                     <div class="invalid-feedback">
-                        {% for error in form.first_name.errors %}
+                        {% for error in form.location.errors %}
                             <span>{{ error }}</span>
                         {% endfor %}
                     </div>
                 {% else %}
-                {{form.first_name(class="form-control form-control-lg")}}
+                {{form.location(class="form-control form-control-lg")}}
                 {% endif %}       
             </div>
             <div class="form-group">
-                {{form.last_name.label(class="form-control-label")}}
-                {% if form.last_name.errors %}
-                    {{form.last_name(class="form-control form-control-lg is-invalid")}}
+                {{form.manager_id.label(class="form-control-label")}}
+                {% if form.manager_id.errors %}
+                    {{form.manager_id(class="form-control form-control-lg is-invalid")}}
                     <div class="invalid-feedback">
-                        {% for error in form.last_name.errors %}
+                        {% for error in form.manager_id.errors %}
                             <span>{{ error }}</span>
                         {% endfor %}
                     </div>
                 {% else %}
-                {{form.last_name(class="form-control form-control-lg")}}
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{form.email.label(class="form-control-label")}}
-                {% if form.email.errors %}
-                    {{form.email(class="form-control form-control-lg is-invalid")}}
-                    <div class="invalid-feedback">
-                        {% for error in form.email.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                {{form.email(class="form-control form-control-lg")}}
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{form.age.label(class="form-control-label")}}
-                {% if form.age.errors %}
-                    {{form.age(class="form-control form-control-lg is-invalid")}}
-                    <div class="invalid-feedback">
-                        {% for error in form.age.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                {{form.age(class="form-control form-control-lg")}}
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{form.blood_type.label(class="form-control-label")}}
-                {% if form.blood_type.errors %}
-                    {{form.blood_type(class="is-invalid")}}
-                    <div class="invalid-feedback">
-                        {% for error in form.blood_type.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                {{form.blood_type(class="form-control form-control-lg")}}
+                {{form.manager_id(class="form-control form-control-lg")}}
                 {% endif %}
             </div>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info")}}
             </div>
-            
         </fieldset>
     </form>
+    <table class="table">
+        Current Banks
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Location</th>
+            <th scope="col">Manager</th>
+          </tr>
+        </thead>
+        <tbody>        
+            {% for item in table %}
+            <tr>
+                <th scope="row">{{ table[item]["id"] }}</th>
+                <td>{{ table[item]["location"] }}</td>
+                <td>{{ table[item]["manager"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+      {% for page_num in banks.iter_pages() %}
+                {% if banks.page == page_num %}
+                    <a class="btn btn-info mb-4" href="{{ url_for('CreateBank', page=page_num) }}"><small>{{ page_num }}</small></a>
+                {% else %}
+                    <a class="btn btn-outline-info mb-4" href="{{ url_for('CreateBank', page=page_num) }}"><small>{{ page_num }}</small></a>
+                {% endif %}
+            {% endfor %}
 </div>
 {% endblock content %}
