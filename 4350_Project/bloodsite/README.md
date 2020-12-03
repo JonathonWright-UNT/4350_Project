@@ -1,5 +1,5 @@
-h1. README
-h3. INSTALLATION AND DEPLOYMENT:
+# README
+### INSTALLATION AND DEPLOYMENT:
 
 In order for this program to work, you will need to install a few items.
 All of these items are listed in the Pipfile.
@@ -11,7 +11,7 @@ Move the app-env file into the bloodsite directory to ensure these variables are
 Simply enter the bloodsite directory and type make. A menu will appear to guide you.
 
 After the site is deployed visit http://127.0.0.1:5000/ in the browser of your choice.
-h3. USE:
+### USE:
 
 The site will launch at a homepage, where you can register an account.
 
@@ -20,7 +20,8 @@ The users are employees of the blood bank. You are an employee so you may regist
 
 As an employee you will be creating donors, updating the bank with donations or withdraws, and updating new branches. 
 We have loaded the database with entries to create an ease of use.
-h3. DISCLAIMERS:
+
+### DISCLAIMERS:
 
 Some of the permissions that the employee has over the accounts as well as the banks,
 such as creating their own profile, branch of the bank, among others would be reserved for an administrator or manager.
