@@ -12,6 +12,14 @@ from bloodapp import app, db, bcrypt, mail
 @app.route('/createDonor', methods=["GET", "POST"])
 @login_required
 def createDonor():
+    """This routes to the page where you create the donor
+    Args (all taken in on valid submit of the CreateDonorForm):
+       first_name (str): The first name of the donor
+       last_name (str): the last name
+       blood_type(str): Their blood type
+       age (int): their age
+       email (str): Their email address"""
+
     form = CreateDonorForm()
     if form.validate_on_submit():
         donor = Donor(first_name=form.first_name.data.lower(), last_name=form.last_name.data.lower(), email=form.email.data.lower(),
@@ -24,6 +32,11 @@ def createDonor():
     return render_template('new_donor.html', title="Register", form=form)
 
 def send_donor_email(donor):
+    """Sends new donors an email informing them of their ID
+    Args:
+        donor (obj): This is a donor from the DONOR table
+    Returns:
+        None"""
     msg = Message('New Donor ID', 
                    sender='NoReplyBloodBank@my.unt.edu', 
                    recipients=[donor.email])
@@ -33,16 +46,26 @@ def send_donor_email(donor):
     try:
         mail.send(msg)
     except Exception as e:
-        pass
+        print(e)
 
 @app.route('/logout')
 def logout():
+    """Logs out user"""
     logout_user()
     return redirect(url_for('login'))
 
 @app.route('/UpdateDonor/<int:donor_id>', methods=["GET", "POST"])
 @login_required
 def UpdateDonor(donor_id):
+    """"This routes to the page where you update the donor
+    Args (all taken in on valid submit of the UpdateDonorForm):
+       donor_id (int): the donors id, this loads their entry in the database
+    The rest are optional:
+       first_name (str): The first name of the donor
+       last_name (str): the last name
+       blood_type(str): Their blood type
+       age (int): their age
+       email (str): Their email address"""
     donor = Donor.query.get_or_404(donor_id)
     form = UpdateDonorForm()
     if form.validate_on_submit():
@@ -58,13 +81,20 @@ def UpdateDonor(donor_id):
         form.last_name.data=donor.last_name.capitalize()
         form.email.data=donor.email.capitalize()
         form.age.data=donor.age
-        form.blood_type.data=donor.blood_type
+        form.blood_type.choices=[donor.blood_type]
     return render_template('update_donor.html', title="Update Donor", form=form)
 
 
 @app.route('/LoadDonor', methods=["GET", "POST"])
 @login_required
 def LoadDonor():
+    """"This routes to the page where you load a donor
+    Args (all taken in on valid submit of the DonorForm):
+        donor_id (int): the id of the donor
+        OR:
+            first_name (str): The first name of the donor
+            last_name (str): the last name
+            email (str): Their email address"""
     form = DonorForm()
     donor = None
     if form.validate_on_submit():
@@ -79,6 +109,11 @@ def LoadDonor():
     return render_template('load_donor.html', title="Load Donor", form=form)
 
 def send_reset_email(staff):
+    """Sends an employee a password reset token
+    Args:
+        staff (obj): This is a employee from the STAFF table
+    Returns:
+        None"""
     token = staff.get_reset_token()
     msg = Message('Password Reset Request', 
                    sender='NoReplyBloodBank@my.unt.edu', 
@@ -89,9 +124,12 @@ If you did not make this request, then simply record this email and no changes w
     try:
         mail.send(msg)
     except Exception as e:
-        pass
+        print(e)
+
+
 @app.route("/reset_password", methods=["GET", "POST"])
 def reset_request():
+    """An employee requests a password reset token"""
     if current_user.is_authenticated:
         return redirect('/home')
     form = RequestResetForm()
@@ -105,6 +143,7 @@ def reset_request():
                           
 @app.route("/reset_password/<token>", methods=['GET', 'POST'])
 def reset_token(token):
+    """This is where an employee can change their password using the token"""
     if current_user.is_authenticated:
         return redirect(url_for('LoadDonor'))
     staff = Staff.verify_reset_token(token)
@@ -124,6 +163,7 @@ def reset_token(token):
 @app.route('/CreateBank', methods=["GET", "POST"])
 @login_required
 def CreateBank():
+    """This page displays and creates new bank locations"""
     page_num = request.args.get('page', 1, type=int)
     form = BankForm()
     banks = Bank.query.paginate(per_page=5, page=page_num)
@@ -146,6 +186,7 @@ def CreateBank():
 @app.route('/withdraw', methods=["GET", "POST"])
 @login_required
 def withdraw():
+    """This page displays the current contents of all the banks and allows employees to make a withdraw"""
     form = WithdrawForm()
     units = None
     all_donations = {}
@@ -177,10 +218,11 @@ def withdraw():
                 for unit in units:
                     db.session.delete(unit)
                 db.session.commit()
+                shipped = "all"
             elif form.units.data.isnumeric():
                 units_required = len(units)
                 if int(form.units.data) < len(units):
-                    units_required = int(form.units.data)
+                    units_required = len(units)
                 for unit in units[:units_required]:
                     db.session.delete(unit)
                 db.session.commit()
@@ -192,10 +234,11 @@ def withdraw():
                 for unit in units:
                     db.session.delete(unit)
                 db.session.commit()
+                shipped = "all"
             elif form.units.data.isnumeric():
                 units_required = len(units)
                 if int(form.units.data) < len(units):
-                    units_required = int(form.units.data)
+                    units_required = len(units)
                 for unit in units[:units_required]:
                     db.session.delete(unit)
                 db.session.commit()
@@ -212,6 +255,10 @@ def withdraw():
 @app.route('/DonorPage/<int:donor_id>', methods=["GET", "POST"])
 @login_required
 def DonorPage(donor_id):
+    """This is the page that LoadDonor leads to, where the
+    Donor can choose to donate or the donor can be updated
+    Args:
+        donor_id (int): this is the donors id"""
     donor = Donor.query.get_or_404(donor_id)
     form=DonationForm()
     if form.validate_on_submit():
@@ -249,6 +296,7 @@ def DonorPage(donor_id):
 
 @app.route('/register', methods=["GET", "POST"])
 def createEmployee():
+    """This is the page where the employee can register"""
     form = CreateEmployeeForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
@@ -263,6 +311,7 @@ def createEmployee():
 @app.route('/account', methods=["GET", "POST"])
 @login_required
 def UpdateEmployee():
+    """This allows the logged in user to update their account"""
     staff = current_user
     form = UpdateEmployeeForm()
     if form.validate_on_submit():
@@ -283,10 +332,12 @@ def UpdateEmployee():
 @app.route('/')
 @app.route('/home')
 def home():
+    """Home page"""
     return render_template('home.html', title="Home")
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
+    """This takes in the email and password of an employee and logs them in"""
     if current_user.is_authenticated:
         return redirect(url_for('LoadDonor'))
     form = LoginForm()
